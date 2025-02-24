@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 import json
 import pymongo
-from networksecurity.exceptions.exception import NetworkSecurityException
+from networksecurity.exception.exception import NetworkSecurityException
 from networksecurity.logging.logger import logging
 
 class NetworkDataExtract():
