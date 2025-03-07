@@ -9,7 +9,6 @@ from networksecurity.utils.main_utils.utils import save_object, load_object, loa
 from networksecurity.utils.ml_utils.metric.classification_metric import get_classification_score
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import r2_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import (
@@ -23,9 +22,9 @@ from urllib.parse import urlparse
 import dagshub
 dagshub.init(repo_owner='rahuln2002', repo_name='networksecurity', mlflow=True)
 
-# os.environ["MLFLOW_TRACKING_URI"]="https://dagshub.com/rahuln2002/networksecurity.mlflow"
-# os.environ["MLFLOW_TRACKING_USERNAME"]="rahuln2002"
-# os.environ["MLFLOW_TRACKING_PASSWORD"]=""
+os.environ["MLFLOW_TRACKING_URI"]="https://dagshub.com/rahuln2002/networksecurity.mlflow"
+os.environ["MLFLOW_TRACKING_USERNAME"]="rahuln2002"
+os.environ["MLFLOW_TRACKING_PASSWORD"]="74d8e16f1853aedc4a8bb37b14062970cc19559a"
 
 
 class ModelTrainer:
@@ -36,21 +35,21 @@ class ModelTrainer:
         except Exception as e:
             raise NetworkSecurityException(e,sys)
         
-    def track_mlflow(self,best_model,classificationmetric):
-        mlflow.set_registry_uri("https://dagshub.com/krishnaik06/networksecurity.mlflow")
+    def track_mlflow(self, best_model, classificationmetric):
+        mlflow.set_registry_uri("https://dagshub.com/rahuln2002/networksecurity.mlflow")
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
         with mlflow.start_run():
             f1_score=classificationmetric.f1_score
             precision_score=classificationmetric.precision_score
             recall_score=classificationmetric.recall_score
 
-            mlflow.log_metric("f1_score",f1_score)
-            mlflow.log_metric("precision",precision_score)
-            mlflow.log_metric("recall_score",recall_score)
-            mlflow.sklearn.log_model(best_model,"model")
+            mlflow.log_metric("f1_score", f1_score)
+            mlflow.log_metric("precision", precision_score)
+            mlflow.log_metric("recall_score", recall_score)
+            mlflow.sklearn.log_model(best_model, "model")
 
             if tracking_url_type_store != "file":
-                mlflow.sklearn.log_model(best_model, "model", registered_model_name=best_model)
+                mlflow.sklearn.log_model(best_model, "model", registered_model_name=best_model.__class__.__name__)
             else:
                 mlflow.sklearn.log_model(best_model, "model")
 
@@ -65,20 +64,20 @@ class ModelTrainer:
         params = {
             "Decision Tree" : {
                 'criterion' : ['gini', 'entropy', 'log_loss'],
-                'splitter' : ['best', 'random'],
-                'max_features' : ['sqrt', 'log2'],
+                # 'splitter' : ['best', 'random'],
+                # 'max_features' : ['sqrt', 'log2'],
             },
             "Random Forest" : {
-                'criterion' : ['gini', 'entropy', 'log_loss'],
-                'max_features' : ['sqrt', 'log2', None],
+                # 'criterion' : ['gini', 'entropy', 'log_loss'],
+                # 'max_features' : ['sqrt', 'log2', None],
                 'n_estimators' : [8, 16, 32, 128, 256]
             },
             "Gradient Boosting" : {
-                'loss' : ['log_loss', 'exponential'],
+                # 'loss' : ['log_loss', 'exponential'],
                 'learning_rate' : [.1, .01, .05, .001],
                 'subsample' : [0.6, 0.7, 0.75, 0.85, 0.9],
-                'criterion' : ['squared_error', 'friedman_mse'],
-                'max_features' : ['auto', 'sqrt', 'log2'],
+                # 'criterion' : ['squared_error', 'friedman_mse'],
+                # 'max_features' : ['auto', 'sqrt', 'log2'],
                 'n_estimators' : [8, 16, 32, 64, 128, 256]
             },
             "Logistic Regression" : {},
@@ -122,7 +121,7 @@ class ModelTrainer:
         Network_Model = NetworkModel(preprocessor=preprocessor, model=best_model)
         save_object(self.model_trainer_config.trained_model_file_path, obj=Network_Model)
 
-        save_object('final_model/model.pkl', best_model)       
+        save_object('final_model/model.pkl', Network_Model)
 
         model_trainer_artifact = ModelTrainerArtifact(
             trained_model_file_path=self.model_trainer_config.trained_model_file_path,
